@@ -42,7 +42,7 @@ resource "nifcloud_elastic_ip" "egress" {
 
 # k8s cluster
 module "k8s_cluster" {
-  source = "../"
+  source = "../../"
 
   availability_zone = local.west_az
 
