@@ -89,5 +89,5 @@ Before this module can be used on a project, you must ensure that the following 
 
 ### Software Dependencies
 
-- [Terraform](https://www.terraform.io/downloads.html) 0.13
-- [Terraform Provider for Nifcloud](https://registry.terraform.io/providers/nifcloud/nifcloud/latest) v1.7.0
+- [Terraform](https://www.terraform.io/downloads.html) 1.3.7
+- [Terraform Provider for Nifcloud](https://registry.terraform.io/providers/nifcloud/nifcloud/latest) 1.7.0
