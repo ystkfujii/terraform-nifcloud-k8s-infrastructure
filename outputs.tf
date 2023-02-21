@@ -15,10 +15,5 @@ output "security_group_name" {
 
 output "worker_instance_info" {
   description = "The Worker infomation in cluster"
-  value = {
-    instance_id = module.worker[*].instance_id
-    unique_id   = module.worker[*].unique_id
-    private_ip  = module.worker[*].private_ip
-    public_ip   = module.worker[*].public_ip
-  }
+  value       = module.worker.instance_info
 }
