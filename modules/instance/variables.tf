@@ -33,7 +33,7 @@ variable "interface_private" {
   default = null
   validation {
     condition     = var.interface_private == null ? true : can(cidrnetmask(var.interface_private.ip_address))
-    error_message = "Must be a valid IPv4 CIDR block address"
+    error_message = "Must be a valid IPv4 CIDR block address."
   }
 }
 
@@ -58,6 +58,6 @@ variable "accounting_type" {
       var.accounting_type == "1", // Monthly
       var.accounting_type == "2", // Pay per use
     ])
-    error_message = "Must be a 1 or 2"
+    error_message = "Must be a 1 or 2."
   }
 }

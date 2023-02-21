@@ -8,7 +8,7 @@ variable "az_short_name" {
   type        = string
   validation {
     condition     = length(var.az_short_name) == 3
-    error_message = "Must be a 3 charactor long"
+    error_message = "Must be a 3 charactor long."
   }
 }
 
@@ -18,7 +18,7 @@ variable "prefix" {
   default     = "001"
   validation {
     condition     = length(var.prefix) == 3
-    error_message = "Must be a 3 charactor long"
+    error_message = "Must be a 3 charactor long."
   }
 }
 
@@ -27,7 +27,7 @@ variable "role" {
   type        = string
   validation {
     condition     = length(var.role) == 2
-    error_message = "Must be a 2 charactor long"
+    error_message = "Must be a 2 charactor long."
   }
 }
 
@@ -41,7 +41,7 @@ variable "instance_count" {
   type        = number
   validation {
     condition     = var.instance_count > 0
-    error_message = "Must be greater than to 0"
+    error_message = "Must be greater than to 0."
   }
 }
 
@@ -54,7 +54,7 @@ variable "private_network_subnet" {
   type = number
   validation {
     condition     = var.private_network_subnet > 0 && var.private_network_subnet < 32
-    error_message = "Must be greater than to 0 and less than 32"
+    error_message = "Must be greater than to 0 and less than 32."
   }
 
 }
@@ -88,7 +88,7 @@ variable "accounting_type" {
       var.accounting_type == "1", // Monthly
       var.accounting_type == "2", // Pay per use
     ])
-    error_message = "Must be a 1 or 2"
+    error_message = "Must be a 1 or 2."
   }
 }
 

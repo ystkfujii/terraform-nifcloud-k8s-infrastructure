@@ -12,7 +12,7 @@ variable "private_network_cidr" {
   type = string
   validation {
     condition     = can(cidrnetmask(var.private_network_cidr))
-    error_message = "Must be a valid IPv4 CIDR block address"
+    error_message = "Must be a valid IPv4 CIDR block address."
   }
 }
 
@@ -40,6 +40,6 @@ variable "accounting_type" {
       var.accounting_type == "1", // Monthly
       var.accounting_type == "2", // Pay per use
     ])
-    error_message = "Must be a 1 or 2"
+    error_message = "Must be a 1 or 2."
   }
 }
