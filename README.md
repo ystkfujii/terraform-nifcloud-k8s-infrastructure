@@ -73,6 +73,8 @@ Then perform the following commands on the root folder:
 | Name                  | Description                                          | 
 | --------------------- | ---------------------------------------------------- | 
 | controle_plnae_lb     | The DNS name of LB for controle plane                | 
+| security_group_name   | The security group used in the cluster               | 
+| worker_instance_info  | The Worker infomation in cluste                      | 
 
 
 ## Requirements

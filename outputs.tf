@@ -4,6 +4,7 @@ output "controle_plnae_lb" {
 }
 
 output "security_group_name" {
+  description = "The security group used in the cluster"
   value = {
     bastion = nifcloud_security_group.bastion.group_name,
     egress = nifcloud_security_group.egress.group_name,
@@ -13,7 +14,7 @@ output "security_group_name" {
 }
 
 output "worker_instance_info" {
-  description = "worker infomation in cluster"
+  description = "The Worker infomation in cluster"
   value       = {
     instance_id = module.worker[*].instance_id
     unique_id = module.worker[*].unique_id
