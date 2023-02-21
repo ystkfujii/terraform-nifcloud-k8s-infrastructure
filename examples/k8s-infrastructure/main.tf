@@ -1,8 +1,8 @@
 locals {
-  west_region           = "jp-west-1"
-  west_az               = "west-11"
+  west_region = "jp-west-1"
+  west_az     = "west-11"
 
-  instance_key_name     = "deployerkey"
+  instance_key_name = "deployerkey"
 
   instance_type_bastion = "e-medium"
   instance_type_egress  = "e-medium"
@@ -17,7 +17,7 @@ locals {
 # Provider
 #
 provider "nifcloud" {
-  region     = local.west_region
+  region = local.west_region
 }
 
 #####
@@ -49,13 +49,13 @@ module "k8s_cluster" {
   instance_key_name = local.instance_key_name
 
   elasticip_bastion = nifcloud_elastic_ip.bastion.public_ip
-  elasticip_egress = nifcloud_elastic_ip.egress.public_ip
+  elasticip_egress  = nifcloud_elastic_ip.egress.public_ip
 
   instance_count_cp = local.instance_count_cp
   instance_count_wk = local.instance_count_wk
 
   instance_type_bastion = local.instance_type_bastion
-  instance_type_egress = local.instance_type_egress
-  instance_type_cp = local.instance_type_cp
-  instance_type_wk = local.instance_type_wk
+  instance_type_egress  = local.instance_type_egress
+  instance_type_cp      = local.instance_type_cp
+  instance_type_wk      = local.instance_type_wk
 }

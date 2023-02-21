@@ -18,7 +18,7 @@ resource "nifcloud_instance" "this" {
   }
 
   network_interface {
-    network_id = var.interface_private == null ? "net-COMMON_PRIVATE" : var.interface_private.network_id 
+    network_id = var.interface_private == null ? "net-COMMON_PRIVATE" : var.interface_private.network_id
     ip_address = var.interface_private == null ? null : "static"
   }
 

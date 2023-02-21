@@ -1,17 +1,17 @@
 variable "availability_zone" {
   description = "The availability zone"
-  type = string
+  type        = string
 }
 variable "prefix" {
   description = "The prefix for the entire private network"
-  type = string
-  default = "001"
+  type        = string
+  default     = "001"
 }
 
 variable "private_network_cidr" {
   type = string
   validation {
-    condition = can(cidrnetmask(var.private_network_cidr))
+    condition     = can(cidrnetmask(var.private_network_cidr))
     error_message = "Must be a valid IPv4 CIDR block address"
   }
 }
@@ -23,17 +23,17 @@ variable "router_ip_address" {
 variable "dhcp_config" {
   type = object({
     ipaddress_pool_start = string
-    ipaddress_pool_stop   = string
+    ipaddress_pool_stop  = string
   })
 }
 
 variable "router_type" {
-  type = string
+  type    = string
   default = "small"
 }
 
 variable "accounting_type" {
-  type = string
+  type    = string
   default = "1"
   validation {
     condition = anytrue([

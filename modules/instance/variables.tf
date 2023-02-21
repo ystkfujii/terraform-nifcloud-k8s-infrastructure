@@ -1,27 +1,27 @@
 variable "availability_zone" {
   description = "The availability zone"
-  type = string
+  type        = string
 }
 
 variable "instance_id" {
   description = "The instance name"
-  type = string
+  type        = string
 }
 
 variable "key_name" {
   description = "The key name of the Key Pair to use for the instance"
-  type = string
+  type        = string
 }
 
 variable "security_group_name" {
   description = "The security group name to associate with instance"
-  type = string
+  type        = string
 }
 
 variable "public_ip_address" {
   description = "The public ip address of instance"
-  type = string
-  default = null
+  type        = string
+  default     = null
 }
 
 variable "interface_private" {
@@ -32,27 +32,27 @@ variable "interface_private" {
   })
   default = null
   validation {
-    condition = var.interface_private == null ? true : can(cidrnetmask(var.interface_private.ip_address))
+    condition     = var.interface_private == null ? true : can(cidrnetmask(var.interface_private.ip_address))
     error_message = "Must be a valid IPv4 CIDR block address"
   }
 }
 
 variable "instance_type" {
   description = "The type of instance to start. Updates to this field will trigger a stop/start of the instance"
-  type = string
-  default = "e-large"
+  type        = string
+  default     = "e-large"
 }
 
 variable "ubuntu_image_name" {
   description = "The name of image"
-  type = string
-  default = "Ubuntu Server 22.04 LTS"
+  type        = string
+  default     = "Ubuntu Server 22.04 LTS"
 }
 
 variable "accounting_type" {
   description = "Accounting type"
-  type = string
-  default = "1"
+  type        = string
+  default     = "1"
   validation {
     condition = anytrue([
       var.accounting_type == "1", // Monthly
