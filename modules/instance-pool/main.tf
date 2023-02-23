@@ -1,3 +1,8 @@
+
+locals {
+  private_network_cidr = "${var.private_network_subnet}/${var.private_network_prefix}"
+}
+
 #####
 # Security Group
 #
@@ -8,7 +13,7 @@ resource "nifcloud_security_group" "this" {
 }
 
 #####
-# Module : instance
+# Module
 #
 module "instance_pool" {
   source = "../instance"
@@ -22,7 +27,7 @@ module "instance_pool" {
   accounting_type     = var.accounting_type
 
   interface_private = {
-    ip_address = "${var.private_network_3octet}.${count.index + 1}/${var.private_network_subnet}"
+    ip_address = "${cidrhost(local.private_network_cidr, (var.ip_start + count.index + 1))}/${var.private_network_prefix}"
     network_id = var.private_network_id
   }
 

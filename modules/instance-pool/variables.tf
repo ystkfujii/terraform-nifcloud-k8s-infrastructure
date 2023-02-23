@@ -51,17 +51,23 @@ variable "private_network_id" {
 }
 
 variable "private_network_subnet" {
-  type = number
-  validation {
-    condition     = var.private_network_subnet > 0 && var.private_network_subnet < 32
-    error_message = "Must be greater than to 0 and less than 32."
-  }
-
+  type = string
 }
 
-variable "private_network_3octet" {
-  description = "To the third octet of the private network"
-  type        = string
+variable "private_network_prefix" {
+  type = number
+  validation {
+    condition     = var.private_network_prefix > 0 && var.private_network_prefix < 32
+    error_message = "Must be greater than to 0 and less than 32."
+  }
+}
+
+variable "ip_start" {
+  type = number
+  validation {
+    condition     = var.ip_start > 0 && var.ip_start <= 128
+    error_message = "Must be greater than to 0 and less than 129."
+  }
 }
 
 variable "lb_portforward" {

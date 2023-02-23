@@ -13,6 +13,17 @@ variable "prefix" {
   }
 }
 
+variable "private_network_subnet" {
+  description = "The subnet of private network"
+  type        = string
+  default     = "192.168.10.0"
+  validation {
+    condition     = can(cidrnetmask("${var.private_network_subnet}/24"))
+    error_message = "Must be a valid IPv4 CIDR block address."
+  }
+
+}
+
 variable "instance_key_name" {
   description = "The key name of the Key Pair to use for the instance"
   type        = string

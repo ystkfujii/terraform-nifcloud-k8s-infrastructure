@@ -7,27 +7,30 @@ locals {
   role_controle_plane = "cp"
   role_worker         = "wk"
 
-  private_network_subnet = "16"
-  private_network_cidr   = "192.168.0.0/${local.private_network_subnet}"
-  # instance
-  egress_private_ip  = "192.168.0.1/${local.private_network_subnet}"
-  bastion_private_ip = "192.168.0.2/${local.private_network_subnet}"
-  # router
-  router_private_ip = "192.168.100.1"
+  private_network_prefix = 24
+  private_network_cidr   = "${var.private_network_subnet}/${local.private_network_prefix}"
 
-  dhcp_config = {
-    ipaddress_pool_start = "192.168.100.2"
-    ipaddress_pool_stop  = "192.168.100.255"
-  }
+  egress_private_ip  = "${cidrhost(local.private_network_cidr, 1)}/${local.private_network_prefix}"
+  bastion_private_ip = "${cidrhost(local.private_network_cidr, 2)}/${local.private_network_prefix}"
 
-  private_network_3octet_cp = "192.168.1"
-  private_network_3octet_wk = "192.168.2"
+  # Nubmer of 4th octet begins
+  ip_start_controle_plane = 64
+  ip_start_worker         = 32
 
+  # Port used by the protocol
   port_ssh     = 22
   port_squid   = 3128
   port_kubectl = 6443
   port_kubelet = 10250
 }
+
+resource "nifcloud_private_lan" "this" {
+  private_lan_name  = "${var.prefix}lan"
+  availability_zone = var.availability_zone
+  cidr_block        = local.private_network_cidr
+  accounting_type   = var.accounting_type
+}
+
 
 #####
 # Security Group
@@ -47,18 +50,6 @@ resource "nifcloud_security_group" "egress" {
 # Module
 #
 
-# private network
-module "private_network" {
-  source = "./modules/private-network"
-
-  availability_zone = var.availability_zone
-  prefix            = var.prefix
-
-  private_network_cidr = local.private_network_cidr
-  router_ip_address    = local.router_private_ip
-  dhcp_config          = local.dhcp_config
-}
-
 # egress
 module "instance" {
   source = "./modules/instance"
@@ -73,11 +64,11 @@ module "instance" {
   public_ip_address = var.elasticip_egress
   interface_private = {
     ip_address = local.egress_private_ip
-    network_id = module.private_network.network_id
+    network_id = nifcloud_private_lan.this.network_id
   }
 
   depends_on = [
-    module.private_network,
+    nifcloud_private_lan.this,
   ]
 }
 
@@ -95,11 +86,11 @@ module "bastion" {
   public_ip_address = var.elasticip_bastion
   interface_private = {
     ip_address = local.bastion_private_ip
-    network_id = module.private_network.network_id
+    network_id = nifcloud_private_lan.this.network_id
   }
 
   depends_on = [
-    module.private_network,
+    nifcloud_private_lan.this,
   ]
 }
 
@@ -117,9 +108,11 @@ module "controle_plane" {
   instance_count    = var.instance_count_cp
   instance_type     = var.instance_type_cp
 
-  private_network_id     = module.private_network.network_id
-  private_network_subnet = local.private_network_subnet
-  private_network_3octet = local.private_network_3octet_cp
+  private_network_id = nifcloud_private_lan.this.network_id
+
+  private_network_subnet = var.private_network_subnet
+  private_network_prefix = local.private_network_prefix
+  ip_start               = local.ip_start_controle_plane
 
   lb_portforward = {
     from = 6443
@@ -127,7 +120,7 @@ module "controle_plane" {
   }
 
   depends_on = [
-    module.private_network,
+    nifcloud_private_lan.this,
   ]
 }
 
@@ -145,12 +138,14 @@ module "worker" {
   instance_count    = var.instance_count_wk
   instance_type     = var.instance_type_wk
 
-  private_network_id     = module.private_network.network_id
-  private_network_subnet = local.private_network_subnet
-  private_network_3octet = local.private_network_3octet_wk
+  private_network_id = nifcloud_private_lan.this.network_id
+
+  private_network_subnet = var.private_network_subnet
+  private_network_prefix = local.private_network_prefix
+  ip_start               = local.ip_start_worker
 
   depends_on = [
-    module.private_network,
+    nifcloud_private_lan.this,
   ]
 }
 
