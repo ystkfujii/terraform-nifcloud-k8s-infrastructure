@@ -70,6 +70,7 @@ module "instance" {
 
   depends_on = [
     nifcloud_private_lan.this,
+    nifcloud_security_group.egress,
   ]
 }
 
@@ -93,6 +94,7 @@ module "bastion" {
 
   depends_on = [
     nifcloud_private_lan.this,
+    nifcloud_security_group.bastion,
   ]
 }
 
