@@ -25,6 +25,10 @@ module "instance_pool" {
     ip_address = "${var.private_network_3octet}.${count.index + 1}/${var.private_network_subnet}"
     network_id = var.private_network_id
   }
+
+  depends_on = [
+    nifcloud_security_group.this,
+  ]
 }
 
 #####
