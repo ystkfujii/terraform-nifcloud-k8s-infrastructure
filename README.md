@@ -28,8 +28,8 @@ resource "nifcloud_elastic_ip" "egress" {
   description       = "egress"
 }
 
-# k8s cluster
-module "k8s_cluster" {
+# k8s infrastructure
+module "k8s_infrastructure" {
   source = "../"
 
   availability_zone = "west-11"
@@ -53,28 +53,30 @@ Then perform the following commands on the root folder:
 
 ## Inputs
 
-| Name                  | Description                                          | Type   | Default   |
-| --------------------- | ---------------------------------------------------- | ------ | --------- |
-| availability_zone     | The availability zone                                | string |           |
-| prefix                | The prefix for the entire cluster                    | string | `001`     |
-| instance_key_name     | The key name of the Key Pair to use for the instance | string |           |
-| elasticip_bastion     | ElasticIP of bastion server                          | string |           |
-| elasticip_egress      | ElasticIP of egress server                           | string |           |
-| instance_count_cp     | Number of controle plane to be created               | number |           |
-| instance_count_wk     | Number of worker to be created                       | number |           |
-| instance_type_egress  | The instance type of egress server                   | string | `e-large` |
-| instance_type_bastion | The instance type of bastion server                  | string | `e-large` |
-| instance_type_wk      | The instance type of worker                          | string | `e-large` |
-| instance_type_cp      | The instance type of controle plane                  | string | `e-large` |
-| accounting_type       | Accounting type                                      | string | `1`       |
+| Name                   | Description                                                 | Type   | Default        |
+| ---------------------- | ----------------------------------------------------------- | ------ | -------------- |
+| availability_zone      | The availability zone                                       | string |                |
+| prefix                 | Prefix to include in the name of the resource to be created | string | `001`          |
+| private_network_subnet | The subnet of private network                               | string | `192.168.10.0` |
+| instance_key_name      | The key name of the Key Pair to use for the instance        | string |                |
+| elasticip_bastion      | ElasticIP of bastion server                                 | string |                |
+| elasticip_egress       | ElasticIP of egress server                                  | string |                |
+| instance_count_cp      | Number of control plane to be created                       | number |                |
+| instance_count_wk      | Number of worker to be created                              | number |                |
+| instance_type_egress   | The instance type of egress server                          | string | `e-large`      |
+| instance_type_bastion  | The instance type of bastion server                         | string | `e-large`      |
+| instance_type_wk       | The instance type of worker                                 | string | `e-large`      |
+| instance_type_cp       | The instance type of control plane                          | string | `e-large`      |
+| accounting_type        | Accounting type                                             | string | `1`            |
 
 ## Outputs
 
 | Name                  | Description                                          |
 | --------------------- | ---------------------------------------------------- |
-| controle_plnae_lb     | The DNS name of LB for controle plane                |
+| control_plane_lb      | The DNS name of LB for control plane                 |
 | security_group_name   | The security group used in the cluster               |
-| worker_instance_info  | The Worker infomation in cluste                      |
+| worker_info           | The worker information in cluster                    |
+| control_plane_info    | The control plane information in cluster             |
 
 
 ## Requirements
@@ -82,9 +84,9 @@ Then perform the following commands on the root folder:
 Before this module can be used on a project, you must ensure that the following pre-requisites are fulfilled:
 
 1. Terraform are [installed](#software-dependencies) on the machine where Terraform is executed.
-2. The Nifcloud Account you execute the module with has the right permissions.
+2. The NIFCLOUD Account you execute the module with has the right permissions.
     - You can set environment variable `NIFCLOUD_ACCESS_KEY_ID` and `NIFCLOUD_SECRET_ACCESS_KEY`
-3. Create an SSH key to log in to the server from the Nifcloud control panel.
+3. Create an SSH key to log in to the server on the NIFCLOUD control panel.
     - The ssh key is used as instance_key_name when creating a cluster
 
 ### Software Dependencies

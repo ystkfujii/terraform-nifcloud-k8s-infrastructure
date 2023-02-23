@@ -4,8 +4,8 @@ locals {
   # e.g. east-11 is e11
   az_short_name = "${substr(reverse(split("-", var.availability_zone))[1], 0, 1)}${local.az_num}"
 
-  role_controle_plane = "cp"
-  role_worker         = "wk"
+  role_control_plane = "cp"
+  role_worker        = "wk"
 
   private_network_prefix = 24
   private_network_cidr   = "${var.private_network_subnet}/${local.private_network_prefix}"
@@ -14,8 +14,8 @@ locals {
   bastion_private_ip = "${cidrhost(local.private_network_cidr, 2)}/${local.private_network_prefix}"
 
   # Nubmer of 4th octet begins
-  ip_start_controle_plane = 64
-  ip_start_worker         = 32
+  ip_start_control_plane = 64
+  ip_start_worker        = 32
 
   # Port used by the protocol
   port_ssh     = 22
@@ -30,7 +30,6 @@ resource "nifcloud_private_lan" "this" {
   cidr_block        = local.private_network_cidr
   accounting_type   = var.accounting_type
 }
-
 
 #####
 # Security Group
@@ -98,15 +97,15 @@ module "bastion" {
   ]
 }
 
-# controle plane
-module "controle_plane" {
+# control plane
+module "control_plane" {
   source = "./modules/instance-pool"
 
   availability_zone = var.availability_zone
 
   az_short_name = local.az_short_name
   prefix        = var.prefix
-  role          = local.role_controle_plane
+  role          = local.role_control_plane
 
   instance_key_name = var.instance_key_name
   instance_count    = var.instance_count_cp
@@ -116,7 +115,7 @@ module "controle_plane" {
 
   private_network_subnet = var.private_network_subnet
   private_network_prefix = local.private_network_prefix
-  ip_start               = local.ip_start_controle_plane
+  ip_start               = local.ip_start_control_plane
 
   lb_portforward = {
     from = 6443
@@ -162,7 +161,7 @@ resource "nifcloud_security_group_rule" "ssh_from_bastion" {
   security_group_names = [
     nifcloud_security_group.egress.group_name,
     module.worker.security_group_name,
-    module.controle_plane.security_group_name,
+    module.control_plane.security_group_name,
   ]
   type                       = "IN"
   from_port                  = local.port_ssh
@@ -174,7 +173,7 @@ resource "nifcloud_security_group_rule" "ssh_from_bastion" {
 # kubectl
 resource "nifcloud_security_group_rule" "kubectl_from_worker" {
   security_group_names = [
-    module.controle_plane.security_group_name,
+    module.control_plane.security_group_name,
   ]
   type                       = "IN"
   from_port                  = local.port_kubectl
@@ -185,7 +184,7 @@ resource "nifcloud_security_group_rule" "kubectl_from_worker" {
 
 resource "nifcloud_security_group_rule" "kubectl_from_bastion" {
   security_group_names = [
-    module.controle_plane.security_group_name,
+    module.control_plane.security_group_name,
   ]
   type                       = "IN"
   from_port                  = local.port_kubectl
@@ -197,7 +196,7 @@ resource "nifcloud_security_group_rule" "kubectl_from_bastion" {
 # kubelet
 resource "nifcloud_security_group_rule" "kubelet_from_worker" {
   security_group_names = [
-    module.controle_plane.security_group_name,
+    module.control_plane.security_group_name,
   ]
   type                       = "IN"
   from_port                  = local.port_kubelet
@@ -206,7 +205,7 @@ resource "nifcloud_security_group_rule" "kubelet_from_worker" {
   source_security_group_name = module.worker.security_group_name
 }
 
-resource "nifcloud_security_group_rule" "kubelet_from_controle_plane" {
+resource "nifcloud_security_group_rule" "kubelet_from_control_plane" {
   security_group_names = [
     module.worker.security_group_name,
   ]
@@ -214,7 +213,7 @@ resource "nifcloud_security_group_rule" "kubelet_from_controle_plane" {
   from_port                  = local.port_kubelet
   to_port                    = local.port_kubelet
   protocol                   = "TCP"
-  source_security_group_name = module.controle_plane.security_group_name
+  source_security_group_name = module.control_plane.security_group_name
 }
 
 # squid
@@ -240,7 +239,7 @@ resource "nifcloud_security_group_rule" "squid_from_worker" {
   source_security_group_name = module.worker.security_group_name
 }
 
-resource "nifcloud_security_group_rule" "squid_from_controle_plane" {
+resource "nifcloud_security_group_rule" "squid_from_control_plane" {
   security_group_names = [
     nifcloud_security_group.egress.group_name,
   ]
@@ -248,5 +247,5 @@ resource "nifcloud_security_group_rule" "squid_from_controle_plane" {
   from_port                  = local.port_squid
   to_port                    = local.port_squid
   protocol                   = "TCP"
-  source_security_group_name = module.controle_plane.security_group_name
+  source_security_group_name = module.control_plane.security_group_name
 }

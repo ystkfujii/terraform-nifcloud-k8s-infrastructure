@@ -1,11 +1,10 @@
 output "instance_info" {
   description = "Instance infomation in instance-pool"
-  value = {
-    instance_id = module.instance_pool[*].instance_id
-    unique_id   = module.instance_pool[*].unique_id
-    private_ip  = module.instance_pool[*].private_ip
-    public_ip   = module.instance_pool[*].public_ip
-  }
+  value = { for v in module.instance_pool : v.instance_id => {
+    unique_id  = v.unique_id,
+    private_ip = v.private_ip,
+    public_ip  = v.public_ip,
+  } }
 }
 
 output "lb_dns_name" {

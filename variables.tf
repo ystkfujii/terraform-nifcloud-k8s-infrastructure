@@ -21,7 +21,6 @@ variable "private_network_subnet" {
     condition     = can(cidrnetmask("${var.private_network_subnet}/24"))
     error_message = "Must be a valid IPv4 CIDR block address."
   }
-
 }
 
 variable "instance_key_name" {
@@ -40,7 +39,7 @@ variable "elasticip_egress" {
 }
 
 variable "instance_count_cp" {
-  description = "Number of controle plane to be created"
+  description = "Number of control plane to be created"
   type        = number
 }
 
@@ -68,7 +67,7 @@ variable "instance_type_wk" {
 }
 
 variable "instance_type_cp" {
-  description = "The instance type of controle plane"
+  description = "The instance type of control plane"
   type        = string
   default     = "e-large"
 }
