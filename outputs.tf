@@ -15,9 +15,9 @@ output "security_group_name" {
 
 output "egress_info" {
   description = "The egress information in cluster"
-  value = { "${module.instance.instance_id}" : {
-    unique_id  = module.instance.unique_id,
-    private_ip = module.instance.private_ip,
+  value = { "${module.egress.instance_id}" : {
+    unique_id  = module.egress.unique_id,
+    private_ip = module.egress.private_ip,
   } }
 }
 

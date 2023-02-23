@@ -49,8 +49,7 @@ resource "nifcloud_security_group" "egress" {
 # Module
 #
 
-# egress
-module "instance" {
+module "egress" {
   source  = "ystkfujii/instance/nifcloud"
   version = "0.0.2"
 
@@ -73,7 +72,6 @@ module "instance" {
   ]
 }
 
-# bastion
 module "bastion" {
   source  = "ystkfujii/instance/nifcloud"
   version = "0.0.2"
