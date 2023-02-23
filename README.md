@@ -75,6 +75,8 @@ Then perform the following commands on the root folder:
 | --------------------- | ---------------------------------------------------- |
 | control_plane_lb      | The DNS name of LB for control plane                 |
 | security_group_name   | The security group used in the cluster               |
+| egress_info           | The egress information in cluster                    |
+| bastion_info          | The bastion information in cluster                   |
 | worker_info           | The worker information in cluster                    |
 | control_plane_info    | The control plane information in cluster             |
 

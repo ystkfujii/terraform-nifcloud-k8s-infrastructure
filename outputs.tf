@@ -13,8 +13,24 @@ output "security_group_name" {
   }
 }
 
+output "egress_info" {
+  description = "The egress information in cluster"
+  value = { "${module.instance.instance_id}" : {
+    unique_id  = module.instance.unique_id,
+    private_ip = module.instance.private_ip,
+  } }
+}
+
+output "bastion_info" {
+  description = "The basion information in cluster"
+  value = { "${module.bastion.instance_id}" : {
+    unique_id  = module.bastion.unique_id,
+    private_ip = module.bastion.private_ip,
+  } }
+}
+
 output "worker_info" {
-  description = "The worker infomation in cluster"
+  description = "The worker information in cluster"
   value       = module.worker.instance_info
 }
 

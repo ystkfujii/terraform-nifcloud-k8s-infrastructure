@@ -3,7 +3,6 @@ output "instance_info" {
   value = { for v in module.instance_pool : v.instance_id => {
     unique_id  = v.unique_id,
     private_ip = v.private_ip,
-    public_ip  = v.public_ip,
   } }
 }
 
