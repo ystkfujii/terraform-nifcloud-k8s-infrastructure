@@ -52,7 +52,7 @@ resource "nifcloud_security_group" "egress" {
 # egress
 module "instance" {
   source  = "ystkfujii/instance/nifcloud"
-  version = "0.0.1"
+  version = "0.0.2"
 
   availability_zone   = var.availability_zone
   instance_name       = "${local.az_short_name}${var.prefix}egress"
@@ -76,7 +76,7 @@ module "instance" {
 # bastion
 module "bastion" {
   source  = "ystkfujii/instance/nifcloud"
-  version = "0.0.1"
+  version = "0.0.2"
 
   availability_zone   = var.availability_zone
   instance_name       = "${local.az_short_name}${var.prefix}bastion"

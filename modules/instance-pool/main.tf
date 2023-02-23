@@ -17,7 +17,7 @@ resource "nifcloud_security_group" "this" {
 #
 module "instance_pool" {
   source  = "ystkfujii/instance/nifcloud"
-  version = "0.0.1"
+  version = "0.0.2"
 
   count = var.instance_count
 
