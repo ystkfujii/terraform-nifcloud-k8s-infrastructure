@@ -52,10 +52,11 @@ resource "nifcloud_security_group" "egress" {
 
 # egress
 module "instance" {
-  source = "./modules/instance"
+  source  = "ystkfujii/instance/nifcloud"
+  version = "0.0.1"
 
   availability_zone   = var.availability_zone
-  instance_id         = "${local.az_short_name}${var.prefix}egress"
+  instance_name       = "${local.az_short_name}${var.prefix}egress"
   security_group_name = nifcloud_security_group.egress.group_name
   key_name            = var.instance_key_name
   instance_type       = var.instance_type_egress
@@ -74,10 +75,11 @@ module "instance" {
 
 # bastion
 module "bastion" {
-  source = "./modules/instance"
+  source  = "ystkfujii/instance/nifcloud"
+  version = "0.0.1"
 
   availability_zone   = var.availability_zone
-  instance_id         = "${local.az_short_name}${var.prefix}bastion"
+  instance_name       = "${local.az_short_name}${var.prefix}bastion"
   security_group_name = nifcloud_security_group.bastion.group_name
   key_name            = var.instance_key_name
   instance_type       = var.instance_type_bastion

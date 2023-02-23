@@ -16,11 +16,13 @@ resource "nifcloud_security_group" "this" {
 # Module
 #
 module "instance_pool" {
-  source = "../instance"
-  count  = var.instance_count
+  source  = "ystkfujii/instance/nifcloud"
+  version = "0.0.1"
+
+  count = var.instance_count
 
   availability_zone   = var.availability_zone
-  instance_id         = "${var.az_short_name}${var.prefix}${var.role}${format("%02d", count.index + 1)}"
+  instance_name       = "${var.az_short_name}${var.prefix}${var.role}${format("%02d", count.index + 1)}"
   security_group_name = nifcloud_security_group.this.group_name
   key_name            = var.instance_key_name
   instance_type       = var.instance_type
