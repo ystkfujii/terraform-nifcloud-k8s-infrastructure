@@ -30,7 +30,7 @@ resource "nifcloud_elastic_ip" "egress" {
 
 # k8s infrastructure
 module "k8s_infrastructure" {
-  source = "../"
+  source  = "ystkfujii/k8s-infrastructure/nifcloud"
 
   availability_zone = "west-11"
 
