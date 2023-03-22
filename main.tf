@@ -108,6 +108,7 @@ module "control_plane" {
   instance_key_name = var.instance_key_name
   instance_count    = var.instance_count_cp
   instance_type     = var.instance_type_cp
+  accounting_type   = var.accounting_type
 
   private_network_id = nifcloud_private_lan.this.network_id
 
@@ -138,6 +139,7 @@ module "worker" {
   instance_key_name = var.instance_key_name
   instance_count    = var.instance_count_wk
   instance_type     = var.instance_type_wk
+  accounting_type   = var.accounting_type
 
   private_network_id = nifcloud_private_lan.this.network_id
 
