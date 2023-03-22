@@ -13,6 +13,11 @@ output "security_group_name" {
   }
 }
 
+output "private_network_id" {
+  description = "The private network used in the cluster"
+  value       = nifcloud_private_lan.this.id
+}
+
 output "egress_info" {
   description = "The egress information in cluster"
   value = { (module.egress.instance_id) : {
@@ -35,6 +40,6 @@ output "worker_info" {
 }
 
 output "control_plane_info" {
-  description = "The control plane infomation in cluster"
+  description = "The control plane information in cluster"
   value       = module.control_plane.instance_info
 }
