@@ -44,6 +44,29 @@ resource "nifcloud_security_group" "egress" {
   description       = "${var.prefix} egress"
   availability_zone = var.availability_zone
 }
+resource "nifcloud_security_group" "cp" {
+  group_name        = "${var.prefix}cp"
+  description       = "${var.prefix} control plane"
+  availability_zone = var.availability_zone
+}
+resource "nifcloud_security_group" "wk" {
+  group_name        = "${var.prefix}wk"
+  description       = "${var.prefix} worker"
+  availability_zone = var.availability_zone
+}
+
+#####
+# LB
+#
+resource "nifcloud_load_balancer" "this" {
+
+  load_balancer_name = "${local.az_short_name}${var.prefix}cp"
+  accounting_type    = var.accounting_type
+  balancing_type     = 1 // Round-Robin
+  load_balancer_port = 6443
+  instance_port      = 6443
+  instances          = module.wk[*].instance_id
+}
 
 #####
 # Module
@@ -95,62 +118,52 @@ module "bastion" {
   ]
 }
 
-# control plane
-module "control_plane" {
-  source = "./modules/instance-pool"
+module "cp" {
+  source  = "ystkfujii/instance/nifcloud"
+  version = "0.0.2"
 
-  availability_zone = var.availability_zone
+  count = var.instance_count_cp
 
-  az_short_name = local.az_short_name
-  prefix        = var.prefix
-  role          = local.role_control_plane
-
-  instance_key_name = var.instance_key_name
-  instance_count    = var.instance_count_cp
-  instance_type     = var.instance_type_cp
-  accounting_type   = var.accounting_type
-
-  private_network_id = nifcloud_private_lan.this.network_id
-
-  private_network_subnet = var.private_network_subnet
-  private_network_prefix = local.private_network_prefix
-  ip_start               = local.ip_start_control_plane
-
-  lb_portforward = {
-    from = 6443
-    to   = 6443
+  availability_zone   = var.availability_zone
+  instance_name       = "${local.az_short_name}${var.prefix}cp${format("%02d", count.index + 1)}"
+  security_group_name = nifcloud_security_group.cp.group_name
+  key_name            = var.instance_key_name
+  instance_type       = var.instance_type_bastion
+  accounting_type     = var.accounting_type
+  interface_private = {
+    ip_address = "${cidrhost(local.private_network_cidr, (local.ip_start_control_plane + count.index + 1))}/${local.private_network_prefix}"
+    network_id = nifcloud_private_lan.this.network_id
   }
 
   depends_on = [
     nifcloud_private_lan.this,
+    nifcloud_security_group.cp,
   ]
 }
 
-# worker
-module "worker" {
-  source = "./modules/instance-pool"
+module "wk" {
+  source  = "ystkfujii/instance/nifcloud"
+  version = "0.0.2"
 
-  availability_zone = var.availability_zone
+  count = var.instance_count_wk
 
-  az_short_name = local.az_short_name
-  prefix        = var.prefix
-  role          = local.role_worker
-
-  instance_key_name = var.instance_key_name
-  instance_count    = var.instance_count_wk
-  instance_type     = var.instance_type_wk
-  accounting_type   = var.accounting_type
-
-  private_network_id = nifcloud_private_lan.this.network_id
-
-  private_network_subnet = var.private_network_subnet
-  private_network_prefix = local.private_network_prefix
-  ip_start               = local.ip_start_worker
+  availability_zone   = var.availability_zone
+  instance_name       = "${local.az_short_name}${var.prefix}cp${format("%02d", count.index + 1)}"
+  security_group_name = nifcloud_security_group.wk.group_name
+  key_name            = var.instance_key_name
+  instance_type       = var.instance_type_bastion
+  accounting_type     = var.accounting_type
+  interface_private = {
+    ip_address = "${cidrhost(local.private_network_cidr, (local.ip_start_worker + count.index + 1))}/${local.private_network_prefix}"
+    network_id = nifcloud_private_lan.this.network_id
+  }
 
   depends_on = [
     nifcloud_private_lan.this,
+    nifcloud_security_group.wk,
   ]
 }
+
 
 #####
 # Security Group Rule
@@ -160,8 +173,8 @@ module "worker" {
 resource "nifcloud_security_group_rule" "ssh_from_bastion" {
   security_group_names = [
     nifcloud_security_group.egress.group_name,
-    module.worker.security_group_name,
-    module.control_plane.security_group_name,
+    nifcloud_security_group.wk.group_name,
+    nifcloud_security_group.cp.group_name,
   ]
   type                       = "IN"
   from_port                  = local.port_ssh
@@ -173,18 +186,18 @@ resource "nifcloud_security_group_rule" "ssh_from_bastion" {
 # kubectl
 resource "nifcloud_security_group_rule" "kubectl_from_worker" {
   security_group_names = [
-    module.control_plane.security_group_name,
+    nifcloud_security_group.cp.group_name,
   ]
   type                       = "IN"
   from_port                  = local.port_kubectl
   to_port                    = local.port_kubectl
   protocol                   = "TCP"
-  source_security_group_name = module.worker.security_group_name
+  source_security_group_name = nifcloud_security_group.wk.group_name
 }
 
 resource "nifcloud_security_group_rule" "kubectl_from_bastion" {
   security_group_names = [
-    module.control_plane.security_group_name,
+    nifcloud_security_group.cp.group_name,
   ]
   type                       = "IN"
   from_port                  = local.port_kubectl
@@ -196,24 +209,24 @@ resource "nifcloud_security_group_rule" "kubectl_from_bastion" {
 # kubelet
 resource "nifcloud_security_group_rule" "kubelet_from_worker" {
   security_group_names = [
-    module.control_plane.security_group_name,
+    nifcloud_security_group.cp.group_name,
   ]
   type                       = "IN"
   from_port                  = local.port_kubelet
   to_port                    = local.port_kubelet
   protocol                   = "TCP"
-  source_security_group_name = module.worker.security_group_name
+  source_security_group_name = nifcloud_security_group.wk.group_name
 }
 
 resource "nifcloud_security_group_rule" "kubelet_from_control_plane" {
   security_group_names = [
-    module.worker.security_group_name,
+    nifcloud_security_group.wk.group_name,
   ]
   type                       = "IN"
   from_port                  = local.port_kubelet
   to_port                    = local.port_kubelet
   protocol                   = "TCP"
-  source_security_group_name = module.control_plane.security_group_name
+  source_security_group_name = nifcloud_security_group.cp.group_name
 }
 
 # squid
@@ -236,7 +249,7 @@ resource "nifcloud_security_group_rule" "squid_from_worker" {
   from_port                  = local.port_squid
   to_port                    = local.port_squid
   protocol                   = "TCP"
-  source_security_group_name = module.worker.security_group_name
+  source_security_group_name = nifcloud_security_group.wk.group_name
 }
 
 resource "nifcloud_security_group_rule" "squid_from_control_plane" {
@@ -247,5 +260,5 @@ resource "nifcloud_security_group_rule" "squid_from_control_plane" {
   from_port                  = local.port_squid
   to_port                    = local.port_squid
   protocol                   = "TCP"
-  source_security_group_name = module.control_plane.security_group_name
+  source_security_group_name = nifcloud_security_group.cp.group_name
 }
