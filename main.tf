@@ -4,19 +4,6 @@ locals {
   # e.g. east-11 is e11
   az_short_name = "${substr(reverse(split("-", var.availability_zone))[1], 0, 1)}${local.az_num}"
 
-  role_control_plane = "cp"
-  role_worker        = "wk"
-
-  private_network_prefix = 24
-  private_network_cidr   = "${var.private_network_subnet}/${local.private_network_prefix}"
-
-  proxy_private_ip  = "${cidrhost(local.private_network_cidr, 1)}/${local.private_network_prefix}"
-  bastion_private_ip = "${cidrhost(local.private_network_cidr, 2)}/${local.private_network_prefix}"
-
-  # Nubmer of 4th octet begins
-  ip_start_control_plane = 64
-  ip_start_worker        = 32
-
   # Port used by the protocol
   port_ssh     = 22
   port_squid   = 3128
@@ -27,7 +14,7 @@ locals {
 resource "nifcloud_private_lan" "this" {
   private_lan_name  = "${var.prefix}lan"
   availability_zone = var.availability_zone
-  cidr_block        = local.private_network_cidr
+  cidr_block        = var.private_network_cidr
   accounting_type   = var.accounting_type
 }
 
@@ -80,12 +67,12 @@ module "px" {
   instance_name       = "${local.az_short_name}${var.prefix}px"
   security_group_name = nifcloud_security_group.px.group_name
   key_name            = var.instance_key_name
-  instance_type       = var.instance_type_proxy
+  instance_type       = var.instance_type_px
   accounting_type     = var.accounting_type
 
-  public_ip_address = var.elasticip_proxy
+  public_ip_address = var.elasticip_px
   interface_private = {
-    ip_address = local.proxy_private_ip
+    ip_address = var.private_ip_px
     network_id = nifcloud_private_lan.this.network_id
   }
 
@@ -103,12 +90,12 @@ module "bn" {
   instance_name       = "${local.az_short_name}${var.prefix}bn"
   security_group_name = nifcloud_security_group.bn.group_name
   key_name            = var.instance_key_name
-  instance_type       = var.instance_type_bastion
+  instance_type       = var.instance_type_bn
   accounting_type     = var.accounting_type
 
-  public_ip_address = var.elasticip_bastion
+  public_ip_address = var.elasticip_bn
   interface_private = {
-    ip_address = local.bastion_private_ip
+    ip_address = var.private_ip_bn
     network_id = nifcloud_private_lan.this.network_id
   }
 
@@ -128,7 +115,7 @@ module "cp" {
   instance_name       = "${local.az_short_name}${var.prefix}${each.key}"
   security_group_name = nifcloud_security_group.cp.group_name
   key_name            = var.instance_key_name
-  instance_type       = var.instance_type_bastion
+  instance_type       = var.instance_type_cp
   accounting_type     = var.accounting_type
   interface_private = {
     ip_address = each.value.private_ip
@@ -151,7 +138,7 @@ module "wk" {
   instance_name       = "${local.az_short_name}${var.prefix}${each.key}"
   security_group_name = nifcloud_security_group.wk.group_name
   key_name            = var.instance_key_name
-  instance_type       = var.instance_type_bastion
+  instance_type       = var.instance_type_wk
   accounting_type     = var.accounting_type
   interface_private = {
     ip_address = each.value.private_ip
@@ -170,7 +157,7 @@ module "wk" {
 #
 
 # ssh
-resource "nifcloud_security_group_rule" "ssh_from_bastion" {
+resource "nifcloud_security_group_rule" "ssh_from_bn" {
   security_group_names = [
     nifcloud_security_group.px.group_name,
     nifcloud_security_group.wk.group_name,
@@ -195,7 +182,7 @@ resource "nifcloud_security_group_rule" "kubectl_from_worker" {
   source_security_group_name = nifcloud_security_group.wk.group_name
 }
 
-resource "nifcloud_security_group_rule" "kubectl_from_bastion" {
+resource "nifcloud_security_group_rule" "kubectl_from_bn" {
   security_group_names = [
     nifcloud_security_group.cp.group_name,
   ]
@@ -230,7 +217,7 @@ resource "nifcloud_security_group_rule" "kubelet_from_control_plane" {
 }
 
 # squid
-resource "nifcloud_security_group_rule" "squid_from_bastion" {
+resource "nifcloud_security_group_rule" "squid_from_bn" {
   security_group_names = [
     nifcloud_security_group.px.group_name,
   ]
