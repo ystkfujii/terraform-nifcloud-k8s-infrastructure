@@ -32,7 +32,7 @@ output "bastion_info" {
   value = { (module.bn.instance_id) : {
     unique_id  = module.bn.unique_id,
     private_ip = module.bn.private_ip,
-    public_ip  = module.px.public_ip,
+    public_ip  = module.bn.public_ip,
   } }
 }
 
@@ -41,7 +41,7 @@ output "worker_info" {
   value = { for v in module.wk : v.instance_id => {
     unique_id  = v.unique_id,
     private_ip = v.private_ip,
-    public_ip  = module.px.public_ip,
+    public_ip  = v.public_ip,
   } }
 }
 
@@ -50,6 +50,6 @@ output "control_plane_info" {
   value = { for v in module.cp : v.instance_id => {
     unique_id  = v.unique_id,
     private_ip = v.private_ip,
-    public_ip  = module.px.public_ip,
+    public_ip  = v.public_ip,
   } }
 }
