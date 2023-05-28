@@ -9,6 +9,8 @@ locals {
   port_squid   = 3128
   port_kubectl = 6443
   port_kubelet = 10250
+
+  extra_userdata = templatefile("${path.module}/templates/extra_userdata.tftpl", {})
 }
 
 resource "nifcloud_private_lan" "this" {
@@ -122,6 +124,8 @@ module "cp" {
     network_id = nifcloud_private_lan.this.network_id
   }
 
+  extra_userdata = local.extra_userdata
+
   depends_on = [
     nifcloud_private_lan.this,
     nifcloud_security_group.cp,
@@ -144,6 +148,8 @@ module "wk" {
     ip_address = each.value.private_ip
     network_id = nifcloud_private_lan.this.network_id
   }
+
+  extra_userdata = local.extra_userdata
 
   depends_on = [
     nifcloud_private_lan.this,
