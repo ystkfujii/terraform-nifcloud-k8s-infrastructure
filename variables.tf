@@ -45,7 +45,7 @@ variable "elasticip_bastion" {
   type        = string
 }
 
-variable "elasticip_egress" {
+variable "elasticip_proxy" {
   description = "ElasticIP of egress server"
   type        = string
 }
@@ -60,7 +60,7 @@ variable "instance_count_wk" {
   type        = number
 }
 
-variable "instance_type_egress" {
+variable "instance_type_proxy" {
   description = "The instance type of egress server"
   type        = string
   default     = "e-large"

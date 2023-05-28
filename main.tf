@@ -10,7 +10,7 @@ locals {
   private_network_prefix = 24
   private_network_cidr   = "${var.private_network_subnet}/${local.private_network_prefix}"
 
-  egress_private_ip  = "${cidrhost(local.private_network_cidr, 1)}/${local.private_network_prefix}"
+  proxy_private_ip  = "${cidrhost(local.private_network_cidr, 1)}/${local.private_network_prefix}"
   bastion_private_ip = "${cidrhost(local.private_network_cidr, 2)}/${local.private_network_prefix}"
 
   # Nubmer of 4th octet begins
@@ -34,14 +34,14 @@ resource "nifcloud_private_lan" "this" {
 #####
 # Security Group
 #
-resource "nifcloud_security_group" "bastion" {
-  group_name        = "${var.prefix}bastion"
+resource "nifcloud_security_group" "bn" {
+  group_name        = "${var.prefix}bn"
   description       = "${var.prefix} bastion"
   availability_zone = var.availability_zone
 }
-resource "nifcloud_security_group" "egress" {
-  group_name        = "${var.prefix}egress"
-  description       = "${var.prefix} egress"
+resource "nifcloud_security_group" "px" {
+  group_name        = "${var.prefix}px"
+  description       = "${var.prefix} proxy"
   availability_zone = var.availability_zone
 }
 resource "nifcloud_security_group" "cp" {
@@ -72,36 +72,36 @@ resource "nifcloud_load_balancer" "this" {
 # Module
 #
 
-module "egress" {
+module "px" {
   source  = "ystkfujii/instance/nifcloud"
   version = "0.0.5"
 
   availability_zone   = var.availability_zone
-  instance_name       = "${local.az_short_name}${var.prefix}egress"
-  security_group_name = nifcloud_security_group.egress.group_name
+  instance_name       = "${local.az_short_name}${var.prefix}px"
+  security_group_name = nifcloud_security_group.px.group_name
   key_name            = var.instance_key_name
-  instance_type       = var.instance_type_egress
+  instance_type       = var.instance_type_proxy
   accounting_type     = var.accounting_type
 
-  public_ip_address = var.elasticip_egress
+  public_ip_address = var.elasticip_proxy
   interface_private = {
-    ip_address = local.egress_private_ip
+    ip_address = local.proxy_private_ip
     network_id = nifcloud_private_lan.this.network_id
   }
 
   depends_on = [
     nifcloud_private_lan.this,
-    nifcloud_security_group.egress,
+    nifcloud_security_group.px,
   ]
 }
 
-module "bastion" {
+module "bn" {
   source  = "ystkfujii/instance/nifcloud"
   version = "0.0.5"
 
   availability_zone   = var.availability_zone
-  instance_name       = "${local.az_short_name}${var.prefix}bastion"
-  security_group_name = nifcloud_security_group.bastion.group_name
+  instance_name       = "${local.az_short_name}${var.prefix}bn"
+  security_group_name = nifcloud_security_group.bn.group_name
   key_name            = var.instance_key_name
   instance_type       = var.instance_type_bastion
   accounting_type     = var.accounting_type
@@ -114,7 +114,7 @@ module "bastion" {
 
   depends_on = [
     nifcloud_private_lan.this,
-    nifcloud_security_group.bastion,
+    nifcloud_security_group.px,
   ]
 }
 
@@ -172,7 +172,7 @@ module "wk" {
 # ssh
 resource "nifcloud_security_group_rule" "ssh_from_bastion" {
   security_group_names = [
-    nifcloud_security_group.egress.group_name,
+    nifcloud_security_group.px.group_name,
     nifcloud_security_group.wk.group_name,
     nifcloud_security_group.cp.group_name,
   ]
@@ -180,7 +180,7 @@ resource "nifcloud_security_group_rule" "ssh_from_bastion" {
   from_port                  = local.port_ssh
   to_port                    = local.port_ssh
   protocol                   = "TCP"
-  source_security_group_name = nifcloud_security_group.bastion.group_name
+  source_security_group_name = nifcloud_security_group.bn.group_name
 }
 
 # kubectl
@@ -203,7 +203,7 @@ resource "nifcloud_security_group_rule" "kubectl_from_bastion" {
   from_port                  = local.port_kubectl
   to_port                    = local.port_kubectl
   protocol                   = "TCP"
-  source_security_group_name = nifcloud_security_group.bastion.group_name
+  source_security_group_name = nifcloud_security_group.bn.group_name
 }
 
 # kubelet
@@ -232,18 +232,18 @@ resource "nifcloud_security_group_rule" "kubelet_from_control_plane" {
 # squid
 resource "nifcloud_security_group_rule" "squid_from_bastion" {
   security_group_names = [
-    nifcloud_security_group.egress.group_name,
+    nifcloud_security_group.px.group_name,
   ]
   type                       = "IN"
   from_port                  = local.port_squid
   to_port                    = local.port_squid
   protocol                   = "TCP"
-  source_security_group_name = nifcloud_security_group.bastion.group_name
+  source_security_group_name = nifcloud_security_group.bn.group_name
 }
 
 resource "nifcloud_security_group_rule" "squid_from_worker" {
   security_group_names = [
-    nifcloud_security_group.egress.group_name,
+    nifcloud_security_group.px.group_name,
   ]
   type                       = "IN"
   from_port                  = local.port_squid
@@ -254,7 +254,7 @@ resource "nifcloud_security_group_rule" "squid_from_worker" {
 
 resource "nifcloud_security_group_rule" "squid_from_control_plane" {
   security_group_names = [
-    nifcloud_security_group.egress.group_name,
+    nifcloud_security_group.px.group_name,
   ]
   type                       = "IN"
   from_port                  = local.port_squid
