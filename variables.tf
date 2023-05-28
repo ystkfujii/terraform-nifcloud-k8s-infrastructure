@@ -13,14 +13,26 @@ variable "prefix" {
   }
 }
 
-variable "private_network_subnet" {
+variable "private_network_cidr" {
   description = "The subnet of private network"
   type        = string
-  default     = "192.168.10.0"
+  default     = "192.168.10.0/24"
   validation {
-    condition     = can(cidrnetmask("${var.private_network_subnet}/24"))
+    condition     = can(cidrnetmask(var.private_network_cidr))
     error_message = "Must be a valid IPv4 CIDR block address."
   }
+}
+
+variable "instances_cp" {
+  type = map(object({
+    private_ip = string
+  }))
+}
+
+variable "instances_wk" {
+  type = map(object({
+    private_ip = string
+  }))
 }
 
 variable "instance_key_name" {
@@ -28,33 +40,34 @@ variable "instance_key_name" {
   type        = string
 }
 
-variable "elasticip_bastion" {
+variable "elasticip_bn" {
   description = "ElasticIP of bastion server"
   type        = string
 }
 
-variable "elasticip_egress" {
-  description = "ElasticIP of egress server"
+variable "elasticip_px" {
+  description = "ElasticIP of proxy server"
   type        = string
 }
 
-variable "instance_count_cp" {
-  description = "Number of control plane to be created"
-  type        = number
+variable "private_ip_bn" {
+  description = "Private IP of bastion server"
+  type        = string
 }
 
-variable "instance_count_wk" {
-  description = "Number of worker to be created"
-  type        = number
+variable "private_ip_px" {
+  description = "Private IP of proxy server"
+  type        = string
 }
 
-variable "instance_type_egress" {
-  description = "The instance type of egress server"
+
+variable "instance_type_px" {
+  description = "The instance type of proxy server"
   type        = string
   default     = "e-large"
 }
 
-variable "instance_type_bastion" {
+variable "instance_type_bn" {
   description = "The instance type of bastion server"
   type        = string
   default     = "e-large"
