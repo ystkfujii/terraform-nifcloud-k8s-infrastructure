@@ -65,7 +65,7 @@ resource "nifcloud_load_balancer" "this" {
   balancing_type     = 1 // Round-Robin
   load_balancer_port = 6443
   instance_port      = 6443
-  instances          = module.wk[*].instance_id
+  instances          = [for v in module.cp : v.instance_id]
 }
 
 #####
@@ -74,7 +74,7 @@ resource "nifcloud_load_balancer" "this" {
 
 module "egress" {
   source  = "ystkfujii/instance/nifcloud"
-  version = "0.0.2"
+  version = "0.0.5"
 
   availability_zone   = var.availability_zone
   instance_name       = "${local.az_short_name}${var.prefix}egress"
@@ -97,7 +97,7 @@ module "egress" {
 
 module "bastion" {
   source  = "ystkfujii/instance/nifcloud"
-  version = "0.0.2"
+  version = "0.0.5"
 
   availability_zone   = var.availability_zone
   instance_name       = "${local.az_short_name}${var.prefix}bastion"
@@ -120,18 +120,18 @@ module "bastion" {
 
 module "cp" {
   source  = "ystkfujii/instance/nifcloud"
-  version = "0.0.2"
+  version = "0.0.5"
 
-  count = var.instance_count_cp
+  for_each = var.instances_cp
 
   availability_zone   = var.availability_zone
-  instance_name       = "${local.az_short_name}${var.prefix}cp${format("%02d", count.index + 1)}"
+  instance_name       = "${local.az_short_name}${var.prefix}${each.key}"
   security_group_name = nifcloud_security_group.cp.group_name
   key_name            = var.instance_key_name
   instance_type       = var.instance_type_bastion
   accounting_type     = var.accounting_type
   interface_private = {
-    ip_address = "${cidrhost(local.private_network_cidr, (local.ip_start_control_plane + count.index + 1))}/${local.private_network_prefix}"
+    ip_address = each.value.private_ip
     network_id = nifcloud_private_lan.this.network_id
   }
 
@@ -143,18 +143,18 @@ module "cp" {
 
 module "wk" {
   source  = "ystkfujii/instance/nifcloud"
-  version = "0.0.2"
+  version = "0.0.5"
 
-  count = var.instance_count_wk
+  for_each = var.instances_wk
 
   availability_zone   = var.availability_zone
-  instance_name       = "${local.az_short_name}${var.prefix}cp${format("%02d", count.index + 1)}"
+  instance_name       = "${local.az_short_name}${var.prefix}${each.key}"
   security_group_name = nifcloud_security_group.wk.group_name
   key_name            = var.instance_key_name
   instance_type       = var.instance_type_bastion
   accounting_type     = var.accounting_type
   interface_private = {
-    ip_address = "${cidrhost(local.private_network_cidr, (local.ip_start_worker + count.index + 1))}/${local.private_network_prefix}"
+    ip_address = each.value.private_ip
     network_id = nifcloud_private_lan.this.network_id
   }
 

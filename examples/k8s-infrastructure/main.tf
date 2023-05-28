@@ -43,8 +43,16 @@ module "k8s_infrastructure" {
   source = "../../"
 
   availability_zone = local.west_az
+  prefix = "dev"
 
   instance_key_name = local.instance_key_name
+  instances_cp = {
+    "cp01": { private_ip: "192.168.10.13/24"}
+  }
+  instances_wk = {
+    "wk01": { private_ip: "192.168.10.23/24"}
+    "wk02": { private_ip: "192.168.10.24/24"}
+  }
 
   elasticip_bastion = nifcloud_elastic_ip.bastion.public_ip
   elasticip_egress  = nifcloud_elastic_ip.egress.public_ip

@@ -23,6 +23,18 @@ variable "private_network_subnet" {
   }
 }
 
+variable "instances_cp" {
+  type = map(object({
+    private_ip = string
+  }))
+}
+
+variable "instances_wk" {
+  type = map(object({
+    private_ip = string
+  }))
+}
+
 variable "instance_key_name" {
   description = "The key name of the Key Pair to use for the instance"
   type        = string
