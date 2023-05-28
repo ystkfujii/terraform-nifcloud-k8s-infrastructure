@@ -1,0 +1,3 @@
+# WorkAround : Disable swap files genereated by systemd-gpt-auto-generator
+#   The reset of process is performed by kubespray
+systemctl mask "dev-sda3.swap"
