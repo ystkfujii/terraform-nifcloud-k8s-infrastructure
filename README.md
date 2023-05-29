@@ -10,6 +10,18 @@ There are examples included in the examples folder but simple usage is as follow
 ```hcl
 locals {
   instance_key_name     = "deployerkey"
+
+  private_network_cidr = "192.168.10.0/24"
+  instances_cp = {
+    "cp01" : { private_ip : "192.168.10.13/24" }
+  }
+  instances_wk = {
+    "wk01" : { private_ip : "192.168.10.23/24" }
+    "wk02" : { private_ip : "192.168.10.24/24" }
+  }
+
+  private_ip_bn = "192.168.10.12/24"
+  private_ip_px = "192.168.10.13/24"
 }
 
 provider "nifcloud" {
@@ -17,15 +29,13 @@ provider "nifcloud" {
 }
 
 # elastic ip
-resource "nifcloud_elastic_ip" "bastion" {
+resource "nifcloud_elastic_ip" "bn" {
   ip_type           = false
   availability_zone = "west-11"
-  description       = "bastion"
 }
-resource "nifcloud_elastic_ip" "egress" {
+resource "nifcloud_elastic_ip" "px" {
   ip_type           = false
   availability_zone = "west-11"
-  description       = "egress"
 }
 
 # k8s infrastructure
@@ -34,13 +44,17 @@ module "k8s_infrastructure" {
 
   availability_zone = "west-11"
 
+  private_network_cidr = local.private_network_cidr
+
   instance_key_name = local.instance_key_name
+  instances_cp      = local.instances_cp
+  instances_wk      = local.instances_wk
 
-  elasticip_bastion = nifcloud_elastic_ip.bastion.public_ip
-  elasticip_egress = nifcloud_elastic_ip.egress.public_ip
+  elasticip_bn = nifcloud_elastic_ip.bn.public_ip
+  elasticip_px = nifcloud_elastic_ip.px.public_ip
 
-  instance_count_cp = 1
-  instance_count_wk = 2
+  private_ip_bn = local.private_ip_bn
+  private_ip_px = local.private_ip_px
 }
 ```
 
@@ -53,33 +67,35 @@ Then perform the following commands on the root folder:
 
 ## Inputs
 
-| Name                   | Description                                                 | Type   | Default        |
-| ---------------------- | ----------------------------------------------------------- | ------ | -------------- |
-| availability_zone      | The availability zone                                       | string |                |
-| prefix                 | Prefix to include in the name of the resource to be created | string | `001`          |
-| private_network_subnet | The subnet of private network                               | string | `192.168.10.0` |
-| instance_key_name      | The key name of the Key Pair to use for the instance        | string |                |
-| elasticip_bastion      | ElasticIP of bastion server                                 | string |                |
-| elasticip_egress       | ElasticIP of egress server                                  | string |                |
-| instance_count_cp      | Number of control plane to be created                       | number |                |
-| instance_count_wk      | Number of worker to be created                              | number |                |
-| instance_type_egress   | The instance type of egress server                          | string | `e-large`      |
-| instance_type_bastion  | The instance type of bastion server                         | string | `e-large`      |
-| instance_type_wk       | The instance type of worker                                 | string | `e-large`      |
-| instance_type_cp       | The instance type of control plane                          | string | `e-large`      |
-| accounting_type        | Accounting type                                             | string | `1`            |
 
+| Name                 | Description                                                 | Type                | Default           |
+| -------------------- | ----------------------------------------------------------- | ------------------- | ----------------- |
+| availability_zone    | The availability zone                                       | string              |                   |
+| prefix               | Prefix to include in the name of the resource to be created | string              | `001`             |
+| private_network_cidr | The cidr of private network                                 | string              | `192.168.10.0/24` |
+| instance_cp          |                                                             | map(object{string}) |                   |
+| instance_wk          |                                                             | map(object{string}) |                   |
+| instance_key_name    | The key name of the Key Pair to use for the instance        | string              |                   |
+| elasticip_bn         | ElasticIP of bastion server                                 | string              |                   |
+| elasticip_px         | ElasticIP of proxy server                                   | string              |                   |
+| private_ip_bn        | ElasticIP of bastion server                                 | string              |                   |
+| private_ip_px        | ElasticIP of proxy server                                   | string              |                   |
+| instance_type_px     | The instance type of proxy server                           | string              | `e-large`         |
+| instance_type_bn     | The instance type of bastion server                         | string              | `e-large`         |
+| instance_type_wk     | The instance type of worker                                 | string              | `e-large`         |
+| instance_type_cp     | The instance type of control plane                          | string              | `e-large`         |
+| accounting_type      | Accounting type                                             | string              | `1`               |
 ## Outputs
 
-| Name                  | Description                                          |
-| --------------------- | ---------------------------------------------------- |
-| control_plane_lb      | The DNS name of LB for control plane                 |
-| security_group_name   | The security group used in the cluster               |
-| private_network_id    | The private network used in the cluster              |
-| egress_info           | The egress information in cluster                    |
-| bastion_info          | The bastion information in cluster                   |
-| worker_info           | The worker information in cluster                    |
-| control_plane_info    | The control plane information in cluster             |
+| Name                | Description                              |
+| ------------------- | ---------------------------------------- |
+| control_plane_lb    | The DNS name of LB for control plane     |
+| security_group_name | The security group used in the cluster   |
+| private_network_id  | The private network used in the cluster  |
+| proxy_info          | The proxy information in cluster         |
+| bastion_info        | The bastion information in cluster       |
+| worker_info         | The worker information in cluster        |
+| control_plane_info  | The control plane information in cluster |
 
 
 ## Requirements
