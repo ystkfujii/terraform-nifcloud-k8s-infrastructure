@@ -49,7 +49,7 @@ resource "nifcloud_security_group" "wk" {
 #
 resource "nifcloud_load_balancer" "this" {
 
-  load_balancer_name = "${local.az_short_name}${var.prefix}cp"
+  load_balancer_name = "${var.prefix}${local.az_short_name}cp"
   accounting_type    = var.accounting_type
   balancing_type     = 1 // Round-Robin
   load_balancer_port = 6443
@@ -66,7 +66,7 @@ module "px" {
   version = "0.0.5"
 
   availability_zone   = var.availability_zone
-  instance_name       = "${local.az_short_name}${var.prefix}px"
+  instance_name       = "${var.prefix}${local.az_short_name}px01"
   security_group_name = nifcloud_security_group.px.group_name
   key_name            = var.instance_key_name
   instance_type       = var.instance_type_px
@@ -89,7 +89,7 @@ module "bn" {
   version = "0.0.5"
 
   availability_zone   = var.availability_zone
-  instance_name       = "${local.az_short_name}${var.prefix}bn"
+  instance_name       = "${var.prefix}${local.az_short_name}bn01"
   security_group_name = nifcloud_security_group.bn.group_name
   key_name            = var.instance_key_name
   instance_type       = var.instance_type_bn
@@ -114,7 +114,7 @@ module "cp" {
   for_each = var.instances_cp
 
   availability_zone   = var.availability_zone
-  instance_name       = "${local.az_short_name}${var.prefix}${each.key}"
+  instance_name       = "${var.prefix}${local.az_short_name}${each.key}"
   security_group_name = nifcloud_security_group.cp.group_name
   key_name            = var.instance_key_name
   instance_type       = var.instance_type_cp
@@ -139,7 +139,7 @@ module "wk" {
   for_each = var.instances_wk
 
   availability_zone   = var.availability_zone
-  instance_name       = "${local.az_short_name}${var.prefix}${each.key}"
+  instance_name       = "${var.prefix}${local.az_short_name}${each.key}"
   security_group_name = nifcloud_security_group.wk.group_name
   key_name            = var.instance_key_name
   instance_type       = var.instance_type_wk
