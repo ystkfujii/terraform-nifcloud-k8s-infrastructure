@@ -66,7 +66,7 @@ module "px" {
   version = "0.0.5"
 
   availability_zone   = var.availability_zone
-  instance_name       = "${local.az_short_name}${var.prefix}px"
+  instance_name       = "${local.az_short_name}${var.prefix}px01"
   security_group_name = nifcloud_security_group.px.group_name
   key_name            = var.instance_key_name
   instance_type       = var.instance_type_px
@@ -89,7 +89,7 @@ module "bn" {
   version = "0.0.5"
 
   availability_zone   = var.availability_zone
-  instance_name       = "${local.az_short_name}${var.prefix}bn"
+  instance_name       = "${local.az_short_name}${var.prefix}bn01"
   security_group_name = nifcloud_security_group.bn.group_name
   key_name            = var.instance_key_name
   instance_type       = var.instance_type_bn
