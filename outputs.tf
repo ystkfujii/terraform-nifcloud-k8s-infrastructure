@@ -21,35 +21,39 @@ output "private_network_id" {
 output "proxy_info" {
   description = "The egress information in cluster"
   value = { (module.px.instance_id) : {
-    unique_id  = module.px.unique_id,
-    private_ip = module.px.private_ip,
-    public_ip  = module.px.public_ip,
+    instance_id = module.px.instance_id,
+    unique_id   = module.px.unique_id,
+    private_ip  = module.px.private_ip,
+    public_ip   = module.px.public_ip,
   } }
 }
 
 output "bastion_info" {
   description = "The basion information in cluster"
   value = { (module.bn.instance_id) : {
-    unique_id  = module.bn.unique_id,
-    private_ip = module.bn.private_ip,
-    public_ip  = module.bn.public_ip,
+    instance_id = module.bn.instance_id,
+    unique_id   = module.bn.unique_id,
+    private_ip  = module.bn.private_ip,
+    public_ip   = module.bn.public_ip,
   } }
 }
 
 output "worker_info" {
   description = "The worker information in cluster"
   value = { for v in module.wk : v.instance_id => {
-    unique_id  = v.unique_id,
-    private_ip = v.private_ip,
-    public_ip  = v.public_ip,
+    instance_id = v.instance_id,
+    unique_id   = v.unique_id,
+    private_ip  = v.private_ip,
+    public_ip   = v.public_ip,
   } }
 }
 
 output "control_plane_info" {
   description = "The control plane information in cluster"
   value = { for v in module.cp : v.instance_id => {
-    unique_id  = v.unique_id,
-    private_ip = v.private_ip,
-    public_ip  = v.public_ip,
+    instance_id = v.instance_id,
+    unique_id   = v.unique_id,
+    private_ip  = v.private_ip,
+    public_ip   = v.public_ip,
   } }
 }
