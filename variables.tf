@@ -8,8 +8,8 @@ variable "prefix" {
   type        = string
   default     = "001"
   validation {
-    condition     = length(var.prefix) == 3
-    error_message = "Must be a 3 charactor long."
+    condition     = length(var.prefix) <= 5
+    error_message = "Must be a less than 5 charactor long."
   }
 }
 
